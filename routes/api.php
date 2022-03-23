@@ -24,6 +24,7 @@ Route::middleware(['auth:api'])->group(function (){
     Route::post('/products',[ProductController::class, 'store']);
     Route::delete('/products/{id}', [ProductController::class, 'destroy']);
     Route::put('/products/{id}', [ProductController::class, 'update']);
+    Route::get('/user-products', [ProductController::class, 'usersProducts']);
 });
 
 // Authentication Routes
