@@ -31,7 +31,7 @@ Route::prefix('v1')->middleware('auth:api')->group(function (){
 });
 
 // Authentication Routes
-Route::middleware(['auth:api'])->prefix('v1')->group(function (){
+Route::prefix('v1')->middleware(['auth:api'])->group(function (){
     Route::post('/login', [AuthController::class, 'login'])->withoutMiddleware('auth:api');
     Route::post('/register', [AuthController::class, 'register'])->withoutMiddleware('auth:api');
     Route::post('/logout', [AuthController::class, 'logout']);
