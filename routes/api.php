@@ -15,22 +15,25 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-Route::get('/products', [ProductController::class, 'index']);
-Route::get('/products/{id}', [ProductController::class, 'show']);
-Route::get('/products/search/{name}', [ProductController::class, 'search']);
 
-// Protected Products Routes
-Route::middleware(['auth:api'])->group(function (){
+// Products routes
+Route::prefix('v1')->middleware('auth:api')->group(function (){
+
+    // Protected Products Routes
     Route::post('/products',[ProductController::class, 'store']);
     Route::delete('/products/{id}', [ProductController::class, 'destroy']);
     Route::put('/products/{id}', [ProductController::class, 'update']);
-    Route::get('/user-products', [ProductController::class, 'usersProducts']);
+
+    // Public Products Routes
+    Route::get('/products', [ProductController::class, 'index'])->withoutMiddleware('auth:api');
+    Route::get('/products/{id}', [ProductController::class, 'show'])->withoutMiddleware('auth:api');
+    Route::get('/products/search/{name}', [ProductController::class, 'search'])->withoutMiddleware('auth:api');
 });
 
 // Authentication Routes
-Route::middleware(['api'])->prefix('auth')->group(function (){
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/register', [AuthController::class, 'register']);
+Route::middleware(['auth:api'])->prefix('v1')->group(function (){
+    Route::post('/login', [AuthController::class, 'login'])->withoutMiddleware('auth:api');
+    Route::post('/register', [AuthController::class, 'register'])->withoutMiddleware('auth:api');
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/refresh', [AuthController::class, 'refresh']);
     Route::get('/user-data', [AuthController::class, 'userData']);

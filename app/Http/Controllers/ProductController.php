@@ -14,7 +14,13 @@ class ProductController extends Controller
      */
     public function index()
     {
-        return Product::all();
+        $products = Product::all();
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'products' => $products
+            ]
+        ], 200);
     }
 
     /**
@@ -29,7 +35,13 @@ class ProductController extends Controller
             'description' => 'required',
             'price' => 'required',
         ]);
-        return auth()->user()->products()->create($request->all());
+        $product = auth()->user()->products()->create($request->all());
+        return  response()->json([
+            'status' => 'success',
+            'data' => [
+                'product' => $product
+            ]
+        ], 201);
     }
 
     /**
@@ -38,7 +50,22 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        return Product::find($id);
+        $product = Product::find($id);
+        if ($product){
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'product' => $product
+                ]
+            ], 200);
+        }else{
+            return response()->json([
+                'status' => 'fail',
+                'data' => [
+                    'id' => 'Product not found'
+                ]
+            ],404);
+        }
     }
 
     /**
@@ -48,8 +75,23 @@ class ProductController extends Controller
     public function update(Request $request, $id)
     {
         $product = auth()->user()->products()->find($id);
-        $product->update($request->all());
-        return $product;
+        if ($product){
+            $product->update($request->all());
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'product' => $product
+                ]
+            ], 200);
+        }else{
+            return response()->json([
+                'status' => 'fail',
+                'data' => [
+                    'id' => 'Product not found'
+                ]
+            ],404);
+        }
+
     }
 
     /**
@@ -58,15 +100,29 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        return Product::destroy($id);
-
+        if (Product::destroy($id)){
+            return response()->json([
+                'status' => 'success',
+                'data' => null
+            ], 200);
+        }else{
+            return response()->json([
+                'status' => 'fail',
+                'data' => [
+                    'id' => 'Product not found'
+                ]
+            ],404);
+        }
     }
 
     public function search($name){
-        return Product::where('name', 'like', '%'.$name.'%')->get();
+        $products = Product::where('name', 'like', '%'.$name.'%')->get();
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'products' => $products
+            ]
+        ], 200);
     }
 
-    public function usersProducts(){
-        return auth()->user()->products()->get();
-    }
 }
