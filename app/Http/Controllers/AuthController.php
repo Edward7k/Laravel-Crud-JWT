@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use App\Models\User;
 
@@ -10,16 +10,25 @@ class AuthController extends Controller
 {
     // Login user
     public function login(Request $request){
-        $validator = $request->validate([
+        $validator = Validator::make($request->all(),[
             'email' => 'required',
             'password' => 'required',
         ]);
 
-        // validate user
-        if (! $token = auth()->attempt($validator)) {
+        if($validator->fails()){
             return response()->json([
-                'status' => 'error',
-                'message' => 'invalid credentials'
+                'status' => 'fail',
+                'data' => $validator->errors()
+            ], 400);
+        }
+
+        // validate user
+        if (! $token = auth()->attempt($validator->validated())) {
+            return response()->json([
+                'status' => 'fail',
+                'data' => [
+                    'email' => 'invalid credentials'
+                ]
             ], 401);
         }else{
             // send token and user
@@ -36,17 +45,24 @@ class AuthController extends Controller
 
     // Register user
     public function register(Request $request){
-        $validator = $request->validate([
+        $validator = Validator::make($request->all(), [
             'name' => 'required',
             'email' => 'required|unique:users',
             'password' => 'required'
         ]);
 
-            $user = User::create([
-                'name' => $validator['name'],
-                'email' => $validator['email'],
-                'password' => bcrypt($validator['password']),
-            ]);
+        if($validator->fails()){
+            return response()->json([
+                'status' => 'fail',
+                'data' => $validator->errors()
+            ], 400);
+        }
+
+        $user = User::create([
+            'name' => $validator->validated()['name'],
+            'email' => $validator->validated()['email'],
+            'password' => bcrypt($validator->validated()['password']),
+        ]);
 
             return response()->json([
                 'status' => 'success',
